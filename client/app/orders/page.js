@@ -15,10 +15,10 @@ export default function OrdersPage() {
   }, [])
 
   if (orders.length === 0)
-    return <p>No orders yet</p>
+    return <p className="px-6 py-10">No orders yet</p>
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-bold mb-6">My Orders</h1>
 
       {orders.map(order => (

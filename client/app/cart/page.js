@@ -26,7 +26,7 @@ export default function CartPage() {
   }
 
   if (!cart || cart.items.length === 0)
-    return <p>Your cart is empty</p>
+    return <p className="px-6 py-10">Your cart is empty</p>
 
   const total = cart.items.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
@@ -34,7 +34,7 @@ export default function CartPage() {
   )
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
 
       {cart.items.map(item => (

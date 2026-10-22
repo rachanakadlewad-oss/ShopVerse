@@ -5,10 +5,17 @@ const API = axios.create({
 })
 
 API.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem("user"))
+  if (typeof window === "undefined") return config
 
-  if (user?.token) {
-    config.headers.Authorization = `Bearer ${user.token}`
+  try {
+    const raw = localStorage.getItem("user")
+    if (!raw) return config
+    const user = JSON.parse(raw)
+    if (user?.token) {
+      config.headers.Authorization = `Bearer ${user.token}`
+    }
+  } catch {
+    localStorage.removeItem("user")
   }
 
   return config
