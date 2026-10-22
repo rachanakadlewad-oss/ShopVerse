@@ -3,7 +3,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Lock, Mail, User } from "lucide-react"
+import { toast } from "sonner"
 import { useAuth } from "../../context/AuthContext"
+import Loader, { ButtonSpinner } from "../../components/Loader"
 
 export default function Register() {
   const { register, user, loading } = useAuth()
@@ -27,20 +29,19 @@ export default function Register() {
     setSubmitting(true)
     try {
       await register(name, email, password)
+      toast.success("Account created", { description: "Welcome to ShopEase." })
       router.push("/products")
     } catch (err) {
-      setError(err.response?.data?.message || "Could not create your account. Try again.")
+      const message = err.response?.data?.message || "Could not create your account. Try again."
+      setError(message)
+      toast.error("Registration failed", { description: message })
     } finally {
       setSubmitting(false)
     }
   }
 
   if (loading || user) {
-    return (
-      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
-      </div>
-    )
+    return <Loader label={user ? "Taking you to products…" : "Loading…"} />
   }
 
   return (
@@ -114,10 +115,19 @@ export default function Register() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 py-3 font-semibold shadow-lg shadow-purple-500/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 py-3 font-semibold shadow-lg shadow-purple-500/20 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
           >
-            {submitting ? "Creating account…" : "Create account"}
-            {!submitting && <ArrowRight size={16} />}
+            {submitting ? (
+              <>
+                <ButtonSpinner />
+                Creating account…
+              </>
+            ) : (
+              <>
+                Create account
+                <ArrowRight size={16} />
+              </>
+            )}
           </button>
         </form>
 

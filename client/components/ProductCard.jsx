@@ -1,27 +1,34 @@
 "use client"
 import Link from "next/link"
+import { ArrowRight, IndianRupee } from "lucide-react"
 
 export default function ProductCard({ product }) {
   return (
-    <div className="border rounded-lg shadow-md p-4 hover:shadow-xl transition">
-      <img
-        src={product.image}
-        alt={product.title}
-        className="w-full h-40 object-cover rounded"
-      />
+    <article className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-purple-400/40 hover:shadow-purple-500/10">
+      <div className="relative overflow-hidden">
+        <img
+          src={product.image}
+          alt={product.title}
+          className="h-48 w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition group-hover:opacity-100" />
+      </div>
 
-      <h2 className="text-lg font-semibold mt-2">
-        {product.title}
-      </h2>
+      <div className="p-4">
+        <h2 className="line-clamp-1 text-lg font-semibold text-white">{product.title}</h2>
+        <p className="mt-2 flex items-center gap-0.5 text-purple-300">
+          <IndianRupee size={16} />
+          <span className="font-semibold">{product.price}</span>
+        </p>
 
-      <p className="text-gray-600">₹{product.price}</p>
-
-      <Link
-        href={`/products/${product._id}`}
-        className="block mt-3 bg-black text-white text-center py-2 rounded hover:bg-gray-800"
-      >
-        View
-      </Link>
-    </div>
+        <Link
+          href={`/products/${product._id}`}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 py-2.5 text-sm font-medium text-white shadow-lg shadow-purple-500/20"
+        >
+          View details
+          <ArrowRight size={14} />
+        </Link>
+      </div>
+    </article>
   )
 }

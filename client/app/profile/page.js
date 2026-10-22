@@ -2,8 +2,10 @@
 import { useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { LogOut, Mail, Package, ShoppingBag } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
+import Loader from "../../components/Loader"
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth()
@@ -17,15 +19,12 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     logout()
+    toast.success("Signed out")
     router.push("/")
   }
 
   if (loading || !user) {
-    return (
-      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
-      </div>
-    )
+    return <Loader label="Loading profile…" />
   }
 
   return (

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ShoppingBag, Sparkles, ArrowRight, Shield, Zap, Star } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
+import Loader from "../components/Loader"
 
 export default function Home() {
   const { user, loading } = useAuth()
@@ -16,16 +17,7 @@ export default function Home() {
   }, [user, loading, router])
 
   if (loading || user) {
-    return (
-      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
-          <p className="text-sm uppercase tracking-widest text-zinc-400">
-            {user ? "Taking you to products…" : "Loading…"}
-          </p>
-        </div>
-      </div>
-    )
+    return <Loader label={user ? "Taking you to products…" : "Loading…"} />
   }
 
   return (
@@ -107,17 +99,17 @@ export default function Home() {
       <section className="relative z-10 border-t border-white/10 bg-black/40 py-20 backdrop-blur-sm">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 text-center md:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-300 hover:border-purple-500/50 hover:bg-purple-500/5">
-            <div className="mb-3 text-3xl">⚡</div>
+            <Zap className="mx-auto mb-3 h-8 w-8 text-yellow-400" />
             <h3 className="mb-3 text-xl font-semibold">Fast Delivery</h3>
             <p className="text-zinc-400">Lightning-fast shipping across India.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-300 hover:border-pink-500/50 hover:bg-pink-500/5">
-            <div className="mb-3 text-3xl">🔒</div>
+            <Shield className="mx-auto mb-3 h-8 w-8 text-green-400" />
             <h3 className="mb-3 text-xl font-semibold">Secure Payments</h3>
             <p className="text-zinc-400">Encrypted and safe checkout experience.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-300 hover:border-violet-500/50 hover:bg-violet-500/5">
-            <div className="mb-3 text-3xl">🌟</div>
+            <Star className="mx-auto mb-3 h-8 w-8 text-purple-400" />
             <h3 className="mb-3 text-xl font-semibold">Premium Quality</h3>
             <p className="text-zinc-400">Carefully curated top-rated products.</p>
           </div>
