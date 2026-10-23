@@ -4,11 +4,15 @@ const protect = require("../middleware/authMiddleware")
 const {
   addToCart,
   getCart,
-  removeFromCart
+  updateCartItem,
+  removeFromCart,
+  clearCart
 } = require("../controllers/cartController")
 
 router.post("/", protect, addToCart)
 router.get("/", protect, getCart)
+router.patch("/:productId", protect, updateCartItem)
+router.delete("/clear", protect, clearCart)
 router.delete("/:productId", protect, removeFromCart)
 
 module.exports = router

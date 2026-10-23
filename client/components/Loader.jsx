@@ -1,40 +1,46 @@
 "use client"
 import { Loader2 } from "lucide-react"
 
-/**
- * ButtonSpinner — inline spinner for use inside buttons.
- * Uses Lucide Loader2 with spin animation.
- */
-export function ButtonSpinner({ className = "h-4 w-4" }) {
+/** Inline spinner for buttons */
+export function ButtonSpinner({ size = 16, className = "" }) {
   return (
     <Loader2
+      size={size}
       className={`animate-spin ${className}`}
       aria-hidden="true"
-      role="status"
     />
   )
 }
 
-/**
- * Full-page / section Loader with shimmer effect.
- */
+/** Full-page loading screen */
 export default function Loader({ label = "Loading…" }) {
   return (
-    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800">
-      <div className="flex flex-col items-center gap-5 slide-up">
-        {/* Spinner ring */}
-        <div className="relative flex items-center justify-center">
-          <div className="h-14 w-14 rounded-full border-2 border-purple-500/20" />
-          <div className="absolute h-14 w-14 animate-spin rounded-full border-2 border-transparent border-t-purple-400 border-r-pink-400" />
-          <Loader2 className="absolute h-6 w-6 animate-spin text-purple-300" />
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#0a0a0f]">
+      <div className="slide-up flex flex-col items-center gap-6">
+        {/* Double ring spinner */}
+        <div className="relative h-16 w-16">
+          <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+          <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-purple-500 border-r-pink-500" style={{ animationDuration: "0.8s" }} />
+          <div className="absolute inset-2 animate-spin rounded-full border-2 border-transparent border-b-purple-400/60" style={{ animationDuration: "1.4s", animationDirection: "reverse" }} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-3 w-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 opacity-80" />
+          </div>
         </div>
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-sm font-medium tracking-widest text-zinc-300 uppercase">{label}</p>
-          {/* Animated dots */}
-          <div className="flex gap-1 mt-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-bounce [animation-delay:0ms]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-pink-400 animate-bounce [animation-delay:150ms]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-bounce [animation-delay:300ms]" />
+
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm font-medium tracking-widest text-[#9898b0] uppercase">{label}</p>
+          {/* Bouncing dots */}
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="h-1.5 w-1.5 rounded-full bg-purple-500"
+                style={{
+                  animation: `bounceDot 1.2s ease-in-out infinite`,
+                  animationDelay: `${i * 0.2}s`,
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -42,18 +48,44 @@ export default function Loader({ label = "Loading…" }) {
   )
 }
 
-/**
- * Skeleton card placeholder — use while loading product grids.
- */
+/** Skeleton for a product card */
 export function ProductCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-      <div className="h-48 w-full shimmer rounded-t-2xl" />
-      <div className="p-4 flex flex-col gap-3">
-        <div className="h-4 w-3/4 shimmer rounded-full" />
-        <div className="h-4 w-1/2 shimmer rounded-full" />
-        <div className="mt-2 h-9 w-full shimmer rounded-full" />
+    <div className="overflow-hidden rounded-2xl border border-white/8 bg-white/3">
+      <div className="shimmer h-52 w-full" />
+      <div className="p-4 space-y-3">
+        <div className="shimmer h-4 w-3/4 rounded-full" />
+        <div className="shimmer h-3 w-1/2 rounded-full" />
+        <div className="shimmer h-10 w-full rounded-full mt-4" />
       </div>
+    </div>
+  )
+}
+
+/** Skeleton for a single cart row */
+export function CartRowSkeleton() {
+  return (
+    <div className="flex items-center gap-4 rounded-2xl border border-white/8 p-4">
+      <div className="shimmer h-16 w-16 rounded-xl flex-shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="shimmer h-4 w-2/3 rounded-full" />
+        <div className="shimmer h-3 w-1/3 rounded-full" />
+      </div>
+      <div className="shimmer h-9 w-24 rounded-full flex-shrink-0" />
+    </div>
+  )
+}
+
+/** Generic section skeleton (3 lines) */
+export function TextSkeleton({ lines = 3 }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: lines }).map((_, i) => (
+        <div
+          key={i}
+          className={`shimmer h-4 rounded-full ${i === lines - 1 ? "w-2/3" : "w-full"}`}
+        />
+      ))}
     </div>
   )
 }

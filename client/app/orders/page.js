@@ -2,23 +2,29 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
-  IndianRupee,
   Package,
   ShoppingBag,
   ArrowRight,
+  IndianRupee,
   Clock,
   CheckCircle2,
   Truck,
+  Circle,
+  FileText,
 } from "lucide-react"
 import { toast } from "sonner"
 import API from "../../lib/axios"
 import Loader from "../../components/Loader"
 
-const statusConfig = {
-  pending: { icon: Clock, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", label: "Pending" },
-  processing: { icon: Package, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", label: "Processing" },
-  shipped: { icon: Truck, color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/20", label: "Shipped" },
-  delivered: { icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", label: "Delivered" },
+const STATUS = {
+  pending:    { icon: Clock,        color: "text-amber-400",  bg: "bg-amber-400/10 border-amber-400/20",   label: "Pending" },
+  processing: { icon: Circle,       color: "text-blue-400",   bg: "bg-blue-400/10 border-blue-400/20",     label: "Processing" },
+  shipped:    { icon: Truck,        color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/20", label: "Shipped" },
+  delivered:  { icon: CheckCircle2, color: "text-emerald-400",bg: "bg-emerald-400/10 border-emerald-400/20", label: "Delivered" },
+}
+
+function getStatus(s) {
+  return STATUS[s?.toLowerCase()] || STATUS.pending
 }
 
 export default function OrdersPage() {
@@ -26,46 +32,37 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const { data } = await API.get("/orders/my")
-        setOrders(data)
-      } catch (err) {
+    API.get("/orders/my")
+      .then(({ data }) => setOrders(data))
+      .catch((err) =>
         toast.error("Could not load orders", {
           description: err.response?.data?.message || "Please sign in and try again.",
         })
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchOrders()
+      )
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) return <Loader label="Loading orders…" />
 
   if (orders.length === 0) {
     return (
-      <div className="flex min-h-[calc(100vh-73px)] flex-col items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800 px-6 text-white">
-        <div className="scale-in flex flex-col items-center gap-5 text-center">
+      <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center bg-[#0a0a0f] px-6 text-center">
+        <div className="scale-in flex flex-col items-center gap-6">
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-pink-500/20 blur-2xl" />
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/5 border border-white/10">
-              <Package className="h-10 w-10 text-pink-300" />
+            <div className="absolute inset-0 rounded-full bg-pink-500/15 blur-2xl" />
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-white/8 bg-white/4">
+              <Package className="h-10 w-10 text-pink-400" />
             </div>
           </div>
           <div>
-            <p className="text-2xl font-bold">No orders yet</p>
-            <p className="mt-2 text-sm text-zinc-400 max-w-xs">
-              Your purchases will appear here after checkout.
+            <h1 className="text-2xl font-bold">No orders yet</h1>
+            <p className="mt-2 text-sm text-[#9898b0] max-w-xs">
+              Your order history will appear here once you make a purchase.
             </p>
           </div>
-          <Link
-            href="/products"
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 font-semibold shadow-lg shadow-purple-500/25 transition-all hover:scale-105"
-          >
+          <Link href="/products" className="btn-primary flex items-center gap-2 px-7 py-3 text-sm">
             <ShoppingBag size={16} />
-            Start shopping
+            Start Shopping
             <ArrowRight size={15} />
           </Link>
         </div>
@@ -74,72 +71,79 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-gradient-to-br from-black via-zinc-900 to-zinc-800 px-6 py-10 text-white">
+    <div className="min-h-[calc(100vh-64px)] bg-[#0a0a0f] px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 slide-up flex items-center gap-3">
           <Package className="h-7 w-7 text-pink-400" />
-          <h1 className="text-3xl font-bold">My Orders</h1>
-          <span className="ml-2 rounded-full bg-pink-500/20 px-2.5 py-0.5 text-sm text-pink-300 border border-pink-500/30">
-            {orders.length} {orders.length === 1 ? "order" : "orders"}
+          <h1 className="text-2xl font-bold">My Orders</h1>
+          <span className="rounded-full bg-pink-500/15 border border-pink-500/25 px-2.5 py-0.5 text-sm font-semibold text-pink-300">
+            {orders.length}
           </span>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="space-y-4">
           {orders.map((order, i) => {
-            const status = order.status?.toLowerCase() || "pending"
-            const config = statusConfig[status] || statusConfig.pending
-            const StatusIcon = config.icon
+            const { icon: StatusIcon, color, bg, label } = getStatus(order.status)
+            const itemCount = order.items?.length ?? 0
+            const productNames = order.items
+              ?.slice(0, 2)
+              .map((it) => it.title || it.product?.title || "Product")
+              .join(", ")
 
             return (
               <div
                 key={order._id}
-                className="slide-up rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm transition-all hover:border-white/20"
+                className="slide-up rounded-2xl border border-white/8 bg-white/3 p-5 transition-all hover:border-purple-500/20 hover:bg-white/5"
                 style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex flex-col gap-2">
+                  <div className="space-y-2">
                     {/* Order ID */}
-                    <p className="text-xs font-mono text-zinc-500">
-                      Order #{order._id?.slice(-8).toUpperCase()}
+                    <p className="font-mono text-xs text-[#555568]">
+                      Order #{order._id.slice(-8).toUpperCase()}
                     </p>
 
                     {/* Status badge */}
-                    <span
-                      className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${config.bg} ${config.color}`}
-                    >
-                      <StatusIcon size={12} />
-                      {config.label}
+                    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${bg} ${color}`}>
+                      <StatusIcon size={11} />
+                      {label}
                     </span>
 
-                    {/* Items list */}
-                    {order.items && order.items.length > 0 && (
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {order.items.length} item{order.items.length > 1 ? "s" : ""}
+                    {/* Products preview */}
+                    <p className="text-sm text-[#9898b0] max-w-xs truncate">
+                      {productNames}
+                      {itemCount > 2 && ` +${itemCount - 2} more`}
+                    </p>
+
+                    {/* Date */}
+                    {order.createdAt && (
+                      <p className="flex items-center gap-1.5 text-xs text-[#555568]">
+                        <Clock size={11} />
+                        {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </p>
                     )}
                   </div>
 
-                  {/* Total */}
-                  <div className="text-right">
-                    <p className="text-xs text-zinc-500 mb-1">Total</p>
-                    <p className="flex items-center justify-end gap-0.5 text-xl font-bold text-purple-300">
-                      <IndianRupee size={17} />
-                      {Number(order.totalAmount).toLocaleString()}
+                  {/* Right side */}
+                  <div className="flex flex-col items-end gap-3">
+                    <p className="flex items-center gap-0.5 text-xl font-bold text-purple-300">
+                      <IndianRupee size={16} />
+                      {Number(order.totalAmount).toLocaleString("en-IN")}
                     </p>
+                    <p className="text-xs text-[#555568]">{itemCount} item{itemCount !== 1 ? "s" : ""}</p>
+                    <Link
+                      href={`/orders/${order._id}`}
+                      className="flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-2 text-xs font-medium text-[#9898b0] hover:border-purple-500/40 hover:text-purple-300 transition-all"
+                    >
+                      <FileText size={12} />
+                      View Invoice
+                    </Link>
                   </div>
                 </div>
-
-                {/* Order date if available */}
-                {order.createdAt && (
-                  <p className="mt-3 flex items-center gap-1.5 text-xs text-zinc-600 border-t border-white/5 pt-3">
-                    <Clock size={11} />
-                    {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                )}
               </div>
             )
           })}

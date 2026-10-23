@@ -27,7 +27,8 @@ exports.addToCart = async (req, res) => {
       await cart.save()
     }
 
-    res.json(cart)
+    const populated = await cart.populate("items.product")
+    res.json(populated)
   } catch (error) {
     res.status(500).json({ message: "Server Error" })
   }
@@ -45,6 +46,36 @@ exports.getCart = async (req, res) => {
   }
 }
 
+// Update Item Quantity
+exports.updateCartItem = async (req, res) => {
+  try {
+    const { quantity } = req.body
+    const { productId } = req.params
+
+    if (!quantity || quantity < 1) {
+      return res.status(400).json({ message: "Invalid quantity" })
+    }
+
+    const cart = await Cart.findOne({ user: req.user._id })
+    if (!cart) return res.status(404).json({ message: "Cart not found" })
+
+    const itemIndex = cart.items.findIndex(
+      item => item.product.toString() === productId
+    )
+
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: "Item not in cart" })
+    }
+
+    cart.items[itemIndex].quantity = quantity
+    await cart.save()
+    const populated = await cart.populate("items.product")
+    res.json(populated)
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" })
+  }
+}
+
 // Remove Item
 exports.removeFromCart = async (req, res) => {
   try {
@@ -55,7 +86,22 @@ exports.removeFromCart = async (req, res) => {
     )
 
     await cart.save()
-    res.json(cart)
+    const populated = await cart.populate("items.product")
+    res.json(populated)
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" })
+  }
+}
+
+// Clear Cart
+exports.clearCart = async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ user: req.user._id })
+    if (cart) {
+      cart.items = []
+      await cart.save()
+    }
+    res.json({ message: "Cart cleared" })
   } catch (error) {
     res.status(500).json({ message: "Server Error" })
   }

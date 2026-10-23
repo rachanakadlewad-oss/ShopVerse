@@ -14,13 +14,22 @@ const orderSchema = new mongoose.Schema(
           ref: "Product"
         },
         quantity: Number,
-        price: Number
+        price: Number,
+        title: String
       }
     ],
     totalAmount: Number,
     status: {
       type: String,
       default: "Pending"
+    },
+    shippingAddress: {
+      name: String,
+      phone: String,
+      line1: String,
+      city: String,
+      state: String,
+      pincode: String
     }
   },
   { timestamps: true }

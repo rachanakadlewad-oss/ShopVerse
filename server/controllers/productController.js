@@ -6,14 +6,29 @@ exports.createProduct = async (req, res) => {
     const product = await Product.create(req.body)
     res.status(201).json(product)
   } catch (error) {
+    console.error("createProduct error:", error)
     res.status(500).json({ message: "Server Error" })
   }
 }
 
-// Get All Products
+// Get All Products (supports ?search= and ?category= query params)
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find()
+    const { search, category } = req.query
+    const filter = {}
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ]
+    }
+
+    if (category && category !== "All") {
+      filter.category = category
+    }
+
+    const products = await Product.find(filter).sort({ createdAt: -1 })
     res.json(products)
   } catch (error) {
     res.status(500).json({ message: "Server Error" })

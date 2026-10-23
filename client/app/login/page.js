@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Lock, Mail } from "lucide-react"
+import { Mail, Lock, ArrowRight, Eye, EyeOff, Zap } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "../../context/AuthContext"
 import Loader, { ButtonSpinner } from "../../components/Loader"
@@ -13,13 +13,12 @@ export default function Login() {
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace("/products")
-    }
+    if (!loading && user) router.replace("/products")
   }, [user, loading, router])
 
   const handleSubmit = async (e) => {
@@ -28,10 +27,10 @@ export default function Login() {
     setSubmitting(true)
     try {
       await login(email, password)
-      toast.success("Welcome back", { description: "You are signed in." })
+      toast.success("Welcome back!", { description: "You are now signed in." })
       router.push("/products")
     } catch (err) {
-      const message = err.response?.data?.message || "Could not sign in. Check your details and try again."
+      const message = err.response?.data?.message || "Invalid credentials. Please try again."
       setError(message)
       toast.error("Sign in failed", { description: message })
     } finally {
@@ -40,86 +39,105 @@ export default function Login() {
   }
 
   if (loading || user) {
-    return <Loader label={user ? "Taking you to products…" : "Loading…"} />
+    return <Loader label={user ? "Redirecting…" : "Loading…"} />
   }
 
   return (
-    <div className="relative min-h-[calc(100vh-73px)] overflow-hidden bg-gradient-to-br from-black via-zinc-900 to-zinc-800 px-6 py-16 text-white">
-      <div className="absolute top-16 left-10 h-72 w-72 rounded-full bg-purple-600/30 blur-3xl" />
-      <div className="absolute right-10 bottom-10 h-72 w-72 rounded-full bg-pink-600/30 blur-3xl" />
+    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-[#0a0a0f] px-4 py-16">
+      {/* Background glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-purple-600/15 blur-3xl" />
+        <div className="absolute -bottom-32 right-1/4 h-96 w-96 rounded-full bg-pink-600/15 blur-3xl" />
+      </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-md">
-        <div className="mb-8 text-center">
-          <p className="text-sm tracking-widest text-purple-300 uppercase">Welcome back</p>
-          <h1 className="mt-2 text-4xl font-bold">Sign in</h1>
-          <p className="mt-3 text-zinc-400">Continue shopping with your ShopEase account.</p>
+      <div className="relative z-10 w-full max-w-md scale-in">
+        {/* Logo */}
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-xl shadow-purple-500/30">
+            <Zap size={22} className="text-white" />
+          </div>
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">Welcome back</p>
+            <h1 className="mt-1 text-3xl font-bold">Sign in to ShopEase</h1>
+            <p className="mt-1.5 text-sm text-[#9898b0]">Continue your shopping journey</p>
+          </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-3xl border border-white/15 bg-white/10 p-8 shadow-2xl backdrop-blur-xl"
-        >
+        <div className="rounded-3xl border border-white/10 bg-white/3 p-8 backdrop-blur-sm shadow-2xl">
           {error && (
-            <p className="mb-4 rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-              {error}
-            </p>
+            <div className="mb-5 flex items-start gap-3 rounded-xl border border-rose-400/20 bg-rose-500/8 px-4 py-3">
+              <span className="text-rose-400 mt-0.5">⚠</span>
+              <p className="text-sm text-rose-300">{error}</p>
+            </div>
           )}
 
-          <label className="mb-4 block">
-            <span className="mb-2 block text-sm text-zinc-300">Email</span>
-            <div className="relative">
-              <Mail size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="email"
-                placeholder="you@email.com"
-                className="w-full rounded-xl border border-white/15 bg-black/30 py-3 pr-4 pl-10 text-white outline-none placeholder:text-zinc-500 focus:border-purple-400"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#9898b0] mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#555568] pointer-events-none" />
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="input-base pl-10 py-3 text-sm"
+                />
+              </div>
             </div>
-          </label>
 
-          <label className="mb-6 block">
-            <span className="mb-2 block text-sm text-zinc-300">Password</span>
-            <div className="relative">
-              <Lock size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full rounded-xl border border-white/15 bg-black/30 py-3 pr-4 pl-10 text-white outline-none placeholder:text-zinc-500 focus:border-purple-400"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-[#9898b0] mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#555568] pointer-events-none" />
+                <input
+                  type={showPass ? "text" : "password"}
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="input-base pl-10 pr-11 py-3 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#555568] hover:text-white transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
-          </label>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 py-3 font-semibold shadow-lg shadow-purple-500/20 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
-          >
-            {submitting ? (
-              <>
-                <ButtonSpinner />
-                Signing in…
-              </>
-            ) : (
-              <>
-                Sign in
-                <ArrowRight size={16} />
-              </>
-            )}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-primary mt-2 flex w-full items-center justify-center gap-2 py-3.5 text-sm"
+            >
+              {submitting ? (
+                <><ButtonSpinner />Signing in…</>
+              ) : (
+                <>Sign in <ArrowRight size={15} /></>
+              )}
+            </button>
+          </form>
 
-        <p className="mt-6 text-center text-sm text-zinc-400">
-          New here?{" "}
-          <Link href="/register" className="font-medium text-purple-300 hover:text-pink-300">
-            Create an account
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-[#9898b0]">
+            Don't have an account?{" "}
+            <Link href="/register" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+              Create one
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )
