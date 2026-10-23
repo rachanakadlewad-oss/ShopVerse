@@ -185,17 +185,26 @@ select:focus-visible {
 }
 
 /* ─── Input base ─────────────────────────────────────────── */
-.input-base {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  width: 100%;
-  outline: none;
+/* Placed in @layer components so Tailwind utility classes
+   (pl-10, pr-11, py-3, etc.) always override the base padding.
+   This prevents icon / placeholder text overlap in all inputs. */
+@layer components {
+  .input-base {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 0.75rem;
+    /* Safe fallback — overridden by every Tailwind padding utility */
+    padding: 0.75rem 1rem;
+    width: 100%;
+    outline: none;
+  }
+  .input-base::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+  .input-base:hover { border-color: rgba(255,255,255,0.15); }
 }
-.input-base::placeholder { color: var(--text-muted); }
-.input-base:hover { border-color: rgba(255,255,255,0.15); }
 
 /* ─── Print styles ──────────────────────────────────────── */
 @media print {
