@@ -1,4 +1,26 @@
 const Product = require("../models/Product")
+const User = require("../models/User")
+
+// Helper: Safely assign ownerless or orphaned products to an active admin
+const claimOwnerlessProducts = async (adminId) => {
+  try {
+    const existingAdmins = await User.find({ role: "admin" }).distinct("_id")
+    await Product.updateMany(
+      {
+        $or: [
+          { createdBy: { $exists: false } },
+          { createdBy: null },
+          { createdBy: { $nin: existingAdmins } }
+        ]
+      },
+      { $set: { createdBy: adminId } }
+    )
+  } catch (error) {
+    console.error("claimOwnerlessProducts error:", error)
+  }
+}
+
+exports.claimOwnerlessProducts = claimOwnerlessProducts
 
 // Create Product
 exports.createProduct = async (req, res) => {
@@ -17,6 +39,9 @@ exports.createProduct = async (req, res) => {
 // Get Products created by logged-in Admin
 exports.getMyProducts = async (req, res) => {
   try {
+    // Safely assign any ownerless products to the logged-in admin
+    await claimOwnerlessProducts(req.user._id)
+
     const products = await Product.find({ createdBy: req.user._id }).sort({ createdAt: -1 })
     res.json(products)
   } catch (error) {

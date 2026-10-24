@@ -1,6 +1,7 @@
 const Order = require("../models/Order")
 const Cart = require("../models/Cart")
 const Product = require("../models/Product")
+const { claimOwnerlessProducts } = require("./productController")
 
 // Place Order
 exports.placeOrder = async (req, res) => {
@@ -109,6 +110,9 @@ exports.getOrderById = async (req, res) => {
 // Get Orders for Admin (strictly only orders of products owned by this admin)
 exports.getAdminOrders = async (req, res) => {
   try {
+    // Safely assign any ownerless products to this admin
+    await claimOwnerlessProducts(req.user._id)
+
     // 1. Find all product IDs owned by this admin
     const myProducts = await Product.find({ createdBy: req.user._id }).select("_id")
     
@@ -173,6 +177,9 @@ exports.updateOrderStatus = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: "Order not found" })
     }
+
+    // Safely claim any ownerless products first
+    await claimOwnerlessProducts(req.user._id)
 
     // Verify this admin owns at least one product in this order
     const myProducts = await Product.find({ createdBy: req.user._id }).select("_id")
