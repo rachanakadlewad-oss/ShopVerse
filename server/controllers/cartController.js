@@ -40,8 +40,22 @@ exports.getCart = async (req, res) => {
     const cart = await Cart.findOne({ user: req.user._id })
       .populate("items.product")
 
-    res.json(cart)
+    if (!cart) {
+      return res.json({ items: [] })
+    }
+
+    // Filter out stale items whose product has been deleted
+    const validItems = cart.items.filter(item => item.product !== null && item.product !== undefined)
+
+    if (validItems.length !== cart.items.length) {
+      // Persist the cleaned cart
+      cart.items = validItems
+      await cart.save()
+    }
+
+    res.json({ ...cart.toObject(), items: validItems })
   } catch (error) {
+    console.error("getCart error:", error)
     res.status(500).json({ message: "Server Error" })
   }
 }

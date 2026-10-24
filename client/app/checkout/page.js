@@ -82,8 +82,10 @@ export default function CheckoutPage() {
           return
         }
         setCart(data)
-      } catch {
-        toast.error("Couldn't load cart")
+      } catch (err) {
+        toast.error("Couldn't load cart", {
+          description: err.response?.data?.message || "Please try again.",
+        })
         router.replace("/cart")
       } finally {
         setCartLoading(false)
@@ -116,6 +118,15 @@ export default function CheckoutPage() {
       return
     }
 
+    // Validate required shipping address fields before sending
+    const { name, line1, city, state, pincode } = selectedAddress
+    if (!name || !line1 || !city || !state || !pincode) {
+      toast.error("Incomplete address", {
+        description: "Your saved address is missing required fields. Please edit it before placing the order.",
+      })
+      return
+    }
+
     setPlacingOrder(true)
     try {
       const { data: order } = await API.post("/orders", { shippingAddress: selectedAddress })
@@ -127,9 +138,25 @@ export default function CheckoutPage() {
         duration: 6000,
       })
     } catch (err) {
-      toast.error("Order failed", {
-        description: err.response?.data?.message || "Please try again.",
-      })
+      const serverMsg = err.response?.data?.message
+      const status = err.response?.status
+
+      if (status === 400) {
+        // Meaningful business-logic errors from the server
+        toast.error("Could not place order", {
+          description: serverMsg || "Please check your cart and address, then try again.",
+          duration: 8000,
+        })
+      } else if (status === 401) {
+        toast.error("Session expired", {
+          description: "Please sign in again to continue.",
+        })
+      } else {
+        toast.error("Order failed — Server Error", {
+          description: serverMsg || "An unexpected error occurred. Please try again in a moment.",
+          duration: 8000,
+        })
+      }
     } finally {
       setPlacingOrder(false)
     }

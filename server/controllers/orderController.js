@@ -13,7 +13,29 @@ exports.placeOrder = async (req, res) => {
 
     const { shippingAddress } = req.body
 
-    const orderItems = cart.items.map(item => ({
+    // Validate shipping address
+    if (!shippingAddress || !shippingAddress.name || !shippingAddress.line1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+      return res.status(400).json({ message: "Incomplete shipping address. Please provide name, address, city, state, and pincode." })
+    }
+
+    // Filter out stale cart items whose product has been deleted from the database
+    const validItems = cart.items.filter(item => item.product !== null && item.product !== undefined)
+    const staleCount = cart.items.length - validItems.length
+
+    if (staleCount > 0) {
+      console.warn(`placeOrder: ${staleCount} stale/deleted product(s) found in cart for user ${req.user._id}. Removing them.`)
+      // Clean up the stale items from cart
+      cart.items = validItems
+      await cart.save()
+    }
+
+    if (validItems.length === 0) {
+      return res.status(400).json({
+        message: "Your cart contains only unavailable products. Please add valid items before placing an order."
+      })
+    }
+
+    const orderItems = validItems.map(item => ({
       product: item.product._id,
       quantity: item.quantity,
       price: item.product.price,
@@ -29,10 +51,10 @@ exports.placeOrder = async (req, res) => {
       user: req.user._id,
       items: orderItems,
       totalAmount,
-      shippingAddress: shippingAddress || null
+      shippingAddress
     })
 
-    // Clear cart after order
+    // Clear cart after successful order
     cart.items = []
     await cart.save()
 
@@ -40,7 +62,11 @@ exports.placeOrder = async (req, res) => {
 
   } catch (error) {
     console.error("placeOrder error:", error)
-    res.status(500).json({ message: "Server Error" })
+    res.status(500).json({
+      message: error.message && process.env.NODE_ENV !== "production"
+        ? `Server Error: ${error.message}`
+        : "Server Error — please try again."
+    })
   }
 }
 
