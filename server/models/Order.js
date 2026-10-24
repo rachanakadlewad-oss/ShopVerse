@@ -21,7 +21,7 @@ const orderSchema = new mongoose.Schema(
     totalAmount: Number,
     status: {
       type: String,
-      default: "Pending"
+      default: "Order Placed",
     },
     shippingAddress: {
       name: String,

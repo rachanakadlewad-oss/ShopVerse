@@ -92,7 +92,7 @@ export default function Navbar() {
             <Zap size={16} className="text-white" />
           </div>
           <span className="text-lg font-bold tracking-tight">
-            Shop<span className="gradient-text">Ease</span>
+            Shop<span className="gradient-text">Verse</span>
           </span>
         </Link>
 
