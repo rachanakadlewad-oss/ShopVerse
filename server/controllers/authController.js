@@ -5,7 +5,7 @@ const generateToken = require("../utils/generateToken")
 // Register
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password, role } = req.body
 
     const userExists = await User.findOne({ email })
     if (userExists)
@@ -14,10 +14,13 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
+    const assignedRole = role === "admin" ? "admin" : "user"
+
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role: assignedRole
     })
 
     res.status(201).json({

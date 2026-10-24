@@ -1,5 +1,6 @@
 const Order = require("../models/Order")
 const Cart = require("../models/Cart")
+const Product = require("../models/Product")
 
 // Place Order
 exports.placeOrder = async (req, res) => {
@@ -94,13 +95,74 @@ exports.getOrderById = async (req, res) => {
       return res.status(404).json({ message: "Order not found" })
     }
 
-    // Only allow the owner to view their order
-    if (order.user._id.toString() !== req.user._id.toString()) {
+    // Only allow the owner or admin to view order
+    if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized" })
     }
 
     res.json(order)
   } catch (error) {
+    res.status(500).json({ message: "Server Error" })
+  }
+}
+
+// Get Orders for Admin (orders containing products created by this admin)
+exports.getAdminOrders = async (req, res) => {
+  try {
+    const myProducts = await Product.find({ createdBy: req.user._id }).select("_id")
+    const myProductIds = myProducts.map((p) => p._id)
+
+    let orders
+    if (myProductIds.length > 0) {
+      orders = await Order.find({
+        "items.product": { $in: myProductIds }
+      })
+        .populate("user", "name email")
+        .populate("items.product")
+        .sort({ createdAt: -1 })
+    } else {
+      // If this admin has not yet created products with createdBy, check if any products exist with createdBy
+      const hasAnyCreatedBy = await Product.exists({ createdBy: { $exists: true, $ne: null } })
+      if (!hasAnyCreatedBy) {
+        orders = await Order.find()
+          .populate("user", "name email")
+          .populate("items.product")
+          .sort({ createdAt: -1 })
+      } else {
+        orders = []
+      }
+    }
+
+    res.json(orders)
+  } catch (error) {
+    console.error("getAdminOrders error:", error)
+    res.status(500).json({ message: "Server Error" })
+  }
+}
+
+// Update Order Status (Admin only)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" })
+    }
+
+    const order = await Order.findById(req.params.id)
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" })
+    }
+
+    order.status = status
+    await order.save()
+
+    const updated = await Order.findById(req.params.id)
+      .populate("user", "name email")
+      .populate("items.product")
+
+    res.json({ message: "Order status updated successfully", order: updated })
+  } catch (error) {
+    console.error("updateOrderStatus error:", error)
     res.status(500).json({ message: "Server Error" })
   }
 }

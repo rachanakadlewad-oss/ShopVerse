@@ -24,6 +24,7 @@ import Loader from "../../../components/Loader"
 
 const STATUS_STEPS = ["Order Placed", "Processing", "Shipped", "Delivered"]
 const STATUS_MAP = {
+  "order placed": 0,
   pending: 0,
   processing: 1,
   shipped: 2,

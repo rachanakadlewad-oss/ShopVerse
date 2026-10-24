@@ -26,6 +26,10 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       default: "General"
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
     }
   },
   { timestamps: true }

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Lock, Mail, User, Eye, EyeOff, Zap, CheckCircle2 } from "lucide-react"
+import { ArrowRight, Lock, Mail, User, Eye, EyeOff, Zap, CheckCircle2, Shield } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "../../context/AuthContext"
 import Loader, { ButtonSpinner } from "../../components/Loader"
@@ -20,13 +20,18 @@ export default function Register() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [role, setRole] = useState("user")
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/products")
+      if (user.role === "admin") {
+        router.replace("/admin/products")
+      } else {
+        router.replace("/products")
+      }
     }
   }, [user, loading, router])
 
@@ -35,9 +40,14 @@ export default function Register() {
     setError("")
     setSubmitting(true)
     try {
-      await register(name, email, password)
-      toast.success("Account created!", { description: "Welcome to ShopVerse." })
-      router.push("/products")
+      const data = await register(name, email, password, role)
+      if (data?.role === "admin" || role === "admin") {
+        toast.success("Admin Account created!", { description: "Welcome to your Admin Portal." })
+        router.push("/admin/products")
+      } else {
+        toast.success("Account created!", { description: "Welcome to ShopVerse." })
+        router.push("/products")
+      }
     } catch (err) {
       const message = err.response?.data?.message || "Could not create your account. Try again."
       setError(message)
@@ -157,6 +167,33 @@ export default function Register() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Role Selection Dropdown */}
+            <div>
+              <label htmlFor="role" className="block text-xs font-semibold uppercase tracking-wide text-[#9898b0] mb-1.5">
+                Select Role <span className="text-purple-400">*</span>
+              </label>
+              <div className="relative">
+                <Shield size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#555568] pointer-events-none" />
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="input-base pl-10 pr-10 py-3 text-sm appearance-none bg-[#111118] cursor-pointer"
+                >
+                  <option value="user">User (Customer)</option>
+                  <option value="admin">Admin (Manage Products & Orders)</option>
+                </select>
+                <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#555568]">
+                  ▼
+                </div>
+              </div>
+              <p className="mt-1.5 text-[11px] text-[#9898b0]">
+                {role === "admin"
+                  ? "Admin: Add products, view your catalog, and manage orders placed for your products."
+                  : "User: Browse items, shop, and track your personal orders."}
+              </p>
             </div>
 
             <button

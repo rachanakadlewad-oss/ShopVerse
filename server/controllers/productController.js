@@ -3,10 +3,24 @@ const Product = require("../models/Product")
 // Create Product
 exports.createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body)
+    const product = await Product.create({
+      ...req.body,
+      createdBy: req.user?._id
+    })
     res.status(201).json(product)
   } catch (error) {
     console.error("createProduct error:", error)
+    res.status(500).json({ message: "Server Error" })
+  }
+}
+
+// Get Products created by logged-in Admin
+exports.getMyProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ createdBy: req.user._id }).sort({ createdAt: -1 })
+    res.json(products)
+  } catch (error) {
+    console.error("getMyProducts error:", error)
     res.status(500).json({ message: "Server Error" })
   }
 }
@@ -76,6 +90,11 @@ exports.deleteProduct = async (req, res) => {
 
     if (!product)
       return res.status(404).json({ message: "Product not found" })
+
+    // If product has createdBy, verify it's the owner or admin
+    if (product.createdBy && product.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to delete this product" })
+    }
 
     await product.deleteOne()
     res.json({ message: "Product removed" })

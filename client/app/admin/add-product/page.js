@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
   Image as ImageIcon,
@@ -8,12 +8,14 @@ import {
   Plus,
   FileText,
   Tag,
-  ArrowLeft
+  ArrowLeft,
+  Boxes
 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
 import API from "../../../lib/axios"
-import { ButtonSpinner } from "../../../components/Loader"
+import Loader, { ButtonSpinner } from "../../../components/Loader"
+import { useAuth } from "../../../context/AuthContext"
 
 const CATEGORIES = [
   "Electronics", "Fashion", "Home & Kitchen", "Beauty", "Books", "Sports", "General"
@@ -21,8 +23,21 @@ const CATEGORIES = [
 
 export default function AddProduct() {
   const router = useRouter()
+  const { user, loading } = useAuth()
   const [submitting, setSubmitting] = useState(false)
   const [imagePreview, setImagePreview] = useState("")
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        toast.error("Sign in required", { description: "Please sign in to access admin tools." })
+        router.replace("/login")
+      } else if (user.role !== "admin") {
+        toast.error("Unauthorized", { description: "Admin access required." })
+        router.replace("/products")
+      }
+    }
+  }, [user, loading, router])
 
   const [form, setForm] = useState({
     title: "",
@@ -50,8 +65,8 @@ export default function AddProduct() {
         stock: Number(form.stock),
       })
 
-      toast.success("Product added!", { description: `"${form.title}" is now in the catalog.` })
-      router.push("/products")
+      toast.success("Product added!", { description: `"${form.title}" has been added to your products.` })
+      router.push("/admin/products")
     } catch (err) {
       toast.error("Could not add product", {
         description: err.response?.data?.message || "Please try again.",
@@ -59,6 +74,10 @@ export default function AddProduct() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (loading || !user || user.role !== "admin") {
+    return <Loader label="Verifying admin access…" />
   }
 
   return (
@@ -71,11 +90,11 @@ export default function AddProduct() {
         {/* Header */}
         <div className="mb-8 slide-up">
           <Link
-            href="/products"
+            href="/admin/products"
             className="group mb-4 inline-flex items-center gap-2 text-sm text-[#9898b0] hover:text-white transition-colors"
           >
             <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-1" />
-            Back to Products
+            Back to My Products
           </Link>
           <h1 className="text-3xl font-bold">
             Add New <span className="gradient-text">Product</span>

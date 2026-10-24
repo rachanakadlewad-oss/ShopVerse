@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   LogOut, Mail, Package, ShoppingBag, User, Shield,
-  MapPin, Plus, Settings
+  MapPin, Plus, Settings, Boxes, ClipboardList
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 import Loader from "../../components/Loader"
@@ -106,15 +106,35 @@ export default function ProfilePage() {
             ))}
 
             {user.role === "admin" && (
-              <Link
-                href="/admin/add-product"
-                className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3.5 text-sm font-medium transition-all hover:border-white/15 hover:bg-white/5 hover:text-white"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl border bg-blue-500/10 border-blue-500/20">
-                  <Plus size={16} className="text-blue-400" />
-                </span>
-                Add Product
-              </Link>
+              <>
+                <Link
+                  href="/admin/products"
+                  className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3.5 text-sm font-medium transition-all hover:border-white/15 hover:bg-white/5 hover:text-white"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border bg-purple-500/10 border-purple-500/20">
+                    <Boxes size={16} className="text-purple-400" />
+                  </span>
+                  My Products
+                </Link>
+                <Link
+                  href="/admin/orders"
+                  className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3.5 text-sm font-medium transition-all hover:border-white/15 hover:bg-white/5 hover:text-white"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border bg-pink-500/10 border-pink-500/20">
+                    <ClipboardList size={16} className="text-pink-400" />
+                  </span>
+                  Customer Orders
+                </Link>
+                <Link
+                  href="/admin/add-product"
+                  className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3.5 text-sm font-medium transition-all hover:border-white/15 hover:bg-white/5 hover:text-white"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border bg-blue-500/10 border-blue-500/20">
+                    <Plus size={16} className="text-blue-400" />
+                  </span>
+                  Add Product
+                </Link>
+              </>
             )}
           </div>
 

@@ -13,6 +13,8 @@ import {
   Zap,
   Menu,
   X,
+  Boxes,
+  ClipboardList,
 } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "../context/AuthContext"
@@ -98,10 +100,19 @@ export default function Navbar() {
 
         {/* ── Desktop nav ── */}
         <div className="hidden items-center gap-1 md:flex">
-          {navLink("/products", "Products")}
-          {user && navLink("/cart", "Cart", ShoppingCart)}
-          {user && navLink("/orders", "Orders", Package)}
-          {user?.role === "admin" && navLink("/admin/add-product", "Add Product", Plus)}
+          {navLink("/products", "Store")}
+          {user?.role === "admin" ? (
+            <>
+              {navLink("/admin/products", "My Products", Boxes)}
+              {navLink("/admin/orders", "Customer Orders", ClipboardList)}
+              {navLink("/admin/add-product", "Add Product", Plus)}
+            </>
+          ) : (
+            <>
+              {user && navLink("/cart", "Cart", ShoppingCart)}
+              {user && navLink("/orders", "Orders", Package)}
+            </>
+          )}
         </div>
 
         {/* ── Right side ── */}
@@ -153,18 +164,41 @@ export default function Navbar() {
                     )}
                   </div>
                   <div className="p-1.5 space-y-0.5">
-                    <Link href="/profile" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
-                      <User size={15} className="text-purple-400" />
-                      Profile
-                    </Link>
-                    <Link href="/orders" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
-                      <Package size={15} className="text-pink-400" />
-                      My Orders
-                    </Link>
-                    <Link href="/cart" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
-                      <ShoppingCart size={15} className="text-emerald-400" />
-                      Cart
-                    </Link>
+                    {user.role === "admin" ? (
+                      <>
+                        <Link href="/admin/products" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <Boxes size={15} className="text-purple-400" />
+                          My Products
+                        </Link>
+                        <Link href="/admin/orders" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <ClipboardList size={15} className="text-pink-400" />
+                          Customer Orders
+                        </Link>
+                        <Link href="/admin/add-product" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <Plus size={15} className="text-emerald-400" />
+                          Add Product
+                        </Link>
+                        <Link href="/profile" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <User size={15} className="text-blue-400" />
+                          Profile
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/profile" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <User size={15} className="text-purple-400" />
+                          Profile
+                        </Link>
+                        <Link href="/orders" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <Package size={15} className="text-pink-400" />
+                          My Orders
+                        </Link>
+                        <Link href="/cart" className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-[#9898b0] transition-all hover:bg-white/8 hover:text-white">
+                          <ShoppingCart size={15} className="text-emerald-400" />
+                          Cart
+                        </Link>
+                      </>
+                    )}
                     <div className="mx-2 my-1 border-t border-white/8" />
                     <button
                       type="button"
@@ -211,10 +245,21 @@ export default function Navbar() {
           ref={mobileRef}
           className="slide-down border-t border-white/8 bg-[#0a0a0f]/98 px-4 py-4 space-y-1 md:hidden"
         >
-          <MobileLink href="/products" label="Products" active={isActive("/products")} />
-          {user && <MobileLink href="/cart" label="Cart" Icon={ShoppingCart} active={isActive("/cart")} />}
-          {user && <MobileLink href="/orders" label="Orders" Icon={Package} active={isActive("/orders")} />}
-          {user?.role === "admin" && <MobileLink href="/admin/add-product" label="Add Product" Icon={Plus} active={isActive("/admin/add-product")} />}
+          <MobileLink href="/products" label="Store" active={isActive("/products")} />
+          {user?.role === "admin" ? (
+            <>
+              <MobileLink href="/admin/products" label="My Products" Icon={Boxes} active={isActive("/admin/products")} />
+              <MobileLink href="/admin/orders" label="Customer Orders" Icon={ClipboardList} active={isActive("/admin/orders")} />
+              <MobileLink href="/admin/add-product" label="Add Product" Icon={Plus} active={isActive("/admin/add-product")} />
+              <MobileLink href="/profile" label="Profile" Icon={User} active={isActive("/profile")} />
+            </>
+          ) : (
+            <>
+              {user && <MobileLink href="/cart" label="Cart" Icon={ShoppingCart} active={isActive("/cart")} />}
+              {user && <MobileLink href="/orders" label="Orders" Icon={Package} active={isActive("/orders")} />}
+              {user && <MobileLink href="/profile" label="Profile" Icon={User} active={isActive("/profile")} />}
+            </>
+          )}
           {user && (
             <button
               type="button"

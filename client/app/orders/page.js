@@ -17,14 +17,16 @@ import API from "../../lib/axios"
 import Loader from "../../components/Loader"
 
 const STATUS = {
-  pending:    { icon: Clock,        color: "text-amber-400",  bg: "bg-amber-400/10 border-amber-400/20",   label: "Pending" },
-  processing: { icon: Circle,       color: "text-blue-400",   bg: "bg-blue-400/10 border-blue-400/20",     label: "Processing" },
-  shipped:    { icon: Truck,        color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/20", label: "Shipped" },
-  delivered:  { icon: CheckCircle2, color: "text-emerald-400",bg: "bg-emerald-400/10 border-emerald-400/20", label: "Delivered" },
+  "order placed": { icon: Clock,        color: "text-amber-400",  bg: "bg-amber-400/10 border-amber-400/20",   label: "Order Placed" },
+  pending:        { icon: Clock,        color: "text-amber-400",  bg: "bg-amber-400/10 border-amber-400/20",   label: "Order Placed" },
+  processing:     { icon: Circle,       color: "text-blue-400",   bg: "bg-blue-400/10 border-blue-400/20",     label: "Processing" },
+  shipped:        { icon: Truck,        color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/20", label: "Shipped" },
+  delivered:      { icon: CheckCircle2, color: "text-emerald-400",bg: "bg-emerald-400/10 border-emerald-400/20", label: "Delivered" },
+  cancelled:      { icon: Circle,       color: "text-rose-400",   bg: "bg-rose-400/10 border-rose-400/20",     label: "Cancelled" },
 }
 
 function getStatus(s) {
-  return STATUS[s?.toLowerCase()] || STATUS.pending
+  return STATUS[s?.toLowerCase()] || STATUS["order placed"]
 }
 
 export default function OrdersPage() {
