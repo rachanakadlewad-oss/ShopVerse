@@ -155,7 +155,7 @@ export default function AdminOrdersPage() {
     return matchesSearch && matchesStatus
   })
 
-  const totalRevenue = orders.reduce((acc, ord) => acc + (Number(ord.totalAmount) || 0), 0)
+  const totalRevenue = orders.reduce((acc, ord) => acc + (Number(ord.adminTotalAmount ?? ord.totalAmount) || 0), 0)
   const deliveredCount = orders.filter((o) => o.status?.toLowerCase() === "delivered").length
   const pendingCount = orders.filter((o) =>
     ["order placed", "processing"].includes(o.status?.toLowerCase())
@@ -184,7 +184,7 @@ export default function AdminOrdersPage() {
               Customer <span className="gradient-text">Orders</span>
             </h1>
             <p className="mt-1 text-sm text-[#9898b0]">
-              See who ordered your products and update their fulfillment status.
+              Orders placed for products owned by you.
             </p>
           </div>
 
@@ -214,18 +214,18 @@ export default function AdminOrdersPage() {
               <Package size={18} className="text-pink-400" />
             </div>
             <p className="mt-2 text-2xl font-bold text-white">{orders.length}</p>
-            <p className="mt-1 text-xs text-[#9898b0]">Placed by customers</p>
+            <p className="mt-1 text-xs text-[#9898b0]">For your products</p>
           </div>
 
           <div className="rounded-2xl border border-white/8 bg-white/3 p-5 backdrop-blur-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-[#555568]">Total Value</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#555568]">Your Products Value</span>
               <IndianRupee size={18} className="text-purple-400" />
             </div>
             <p className="mt-2 text-2xl font-bold text-purple-300">
               ₹{totalRevenue.toLocaleString("en-IN")}
             </p>
-            <p className="mt-1 text-xs text-[#9898b0]">Gross product sales</p>
+            <p className="mt-1 text-xs text-[#9898b0]">From your owned items</p>
           </div>
 
           <div className="rounded-2xl border border-white/8 bg-white/3 p-5 backdrop-blur-sm">
@@ -423,8 +423,8 @@ export default function AdminOrdersPage() {
 
                   {/* Bottom: Items Ordered */}
                   <div className="border-t border-white/8 pt-4">
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-[#555568] mb-3">
-                      Ordered Products ({order.items?.length || 0})
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-[#9898b0] mb-3">
+                      Your Products in this Order ({order.items?.length || 0})
                     </h4>
                     <div className="space-y-2.5">
                       {order.items?.map((item, idx) => {
@@ -469,10 +469,10 @@ export default function AdminOrdersPage() {
                     <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-3">
                       <span className="text-xs text-[#9898b0]">Payment Method: COD</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[#9898b0]">Order Total:</span>
+                        <span className="text-xs text-[#9898b0]">Your Products Subtotal:</span>
                         <span className="flex items-center font-bold text-base text-purple-300">
                           <IndianRupee size={14} />
-                          {Number(order.totalAmount).toLocaleString("en-IN")}
+                          {Number(order.adminTotalAmount ?? order.totalAmount).toLocaleString("en-IN")}
                         </span>
                       </div>
                     </div>

@@ -106,41 +106,62 @@ exports.getOrderById = async (req, res) => {
   }
 }
 
-// Get Orders for Admin (orders containing products created by this admin)
+// Get Orders for Admin (strictly only orders of products owned by this admin)
 exports.getAdminOrders = async (req, res) => {
   try {
+    // 1. Find all product IDs owned by this admin
     const myProducts = await Product.find({ createdBy: req.user._id }).select("_id")
-    const myProductIds = myProducts.map((p) => p._id)
-
-    let orders
-    if (myProductIds.length > 0) {
-      orders = await Order.find({
-        "items.product": { $in: myProductIds }
-      })
-        .populate("user", "name email")
-        .populate("items.product")
-        .sort({ createdAt: -1 })
-    } else {
-      // If this admin has not yet created products with createdBy, check if any products exist with createdBy
-      const hasAnyCreatedBy = await Product.exists({ createdBy: { $exists: true, $ne: null } })
-      if (!hasAnyCreatedBy) {
-        orders = await Order.find()
-          .populate("user", "name email")
-          .populate("items.product")
-          .sort({ createdAt: -1 })
-      } else {
-        orders = []
-      }
+    
+    // If this admin does not own any products, return empty list
+    if (!myProducts || myProducts.length === 0) {
+      return res.json([])
     }
 
-    res.json(orders)
+    const myProductIds = myProducts.map((p) => p._id.toString())
+    const myProductIdSet = new Set(myProductIds)
+
+    // 2. Find only orders that include at least one product owned by this admin
+    const orders = await Order.find({
+      "items.product": { $in: myProductIds }
+    })
+      .populate("user", "name email")
+      .populate("items.product")
+      .sort({ createdAt: -1 })
+
+    // 3. Filter order items so admin only sees products owned by them,
+    // and compute total for this admin's products
+    const adminOrders = orders
+      .map((order) => {
+        const orderObj = order.toObject()
+
+        const ownedItems = orderObj.items.filter((item) => {
+          const prodId = item.product?._id
+            ? item.product._id.toString()
+            : item.product?.toString()
+          return myProductIdSet.has(prodId)
+        })
+
+        const adminSubtotal = ownedItems.reduce(
+          (sum, it) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+          0
+        )
+
+        return {
+          ...orderObj,
+          items: ownedItems,
+          adminTotalAmount: adminSubtotal
+        }
+      })
+      .filter((order) => order.items.length > 0)
+
+    res.json(adminOrders)
   } catch (error) {
     console.error("getAdminOrders error:", error)
     res.status(500).json({ message: "Server Error" })
   }
 }
 
-// Update Order Status (Admin only)
+// Update Order Status (Admin only - must own products in this order)
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body
@@ -151,6 +172,19 @@ exports.updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id)
     if (!order) {
       return res.status(404).json({ message: "Order not found" })
+    }
+
+    // Verify this admin owns at least one product in this order
+    const myProducts = await Product.find({ createdBy: req.user._id }).select("_id")
+    const myProductIds = myProducts.map((p) => p._id.toString())
+
+    const ownsProductInOrder = order.items.some((item) => {
+      const prodId = item.product?.toString()
+      return myProductIds.includes(prodId)
+    })
+
+    if (!ownsProductInOrder) {
+      return res.status(403).json({ message: "Not authorized to update orders for products you do not own" })
     }
 
     order.status = status
