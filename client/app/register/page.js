@@ -36,7 +36,7 @@ export default function Register() {
     setSubmitting(true)
     try {
       await register(name, email, password)
-      toast.success("Account created!", { description: "Welcome to ShopEase." })
+      toast.success("Account created!", { description: "Welcome to ShopVerse." })
       router.push("/products")
     } catch (err) {
       const message = err.response?.data?.message || "Could not create your account. Try again."
@@ -66,7 +66,7 @@ export default function Register() {
             <Zap size={22} className="text-white" />
           </div>
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">Join ShopEase</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">Join ShopVerse</p>
             <h1 className="mt-1 text-3xl font-bold">Create your account</h1>
             <p className="mt-1.5 text-sm text-[#9898b0]">Start your premium shopping journey</p>
           </div>

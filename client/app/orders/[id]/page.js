@@ -150,10 +150,10 @@ export default function OrderInvoicePage() {
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/30">
                     <Zap size={18} className="text-white" />
                   </div>
-                  <span className="text-xl font-bold">ShopEase</span>
+                  <span className="text-xl font-bold">ShopVerse</span>
                 </div>
                 <p className="text-xs text-[#9898b0]">Premium Online Shopping</p>
-                <p className="text-xs text-[#555568]">support@shopease.in</p>
+                <p className="text-xs text-[#555568]">support@shopverse.in</p>
               </div>
 
               {/* Invoice title */}
@@ -321,7 +321,7 @@ export default function OrderInvoicePage() {
 
             {/* Footer */}
             <div className="border-t border-white/8 pt-6 text-center">
-              <p className="text-sm font-semibold text-purple-300">Thank you for shopping with ShopEase!</p>
+              <p className="text-sm font-semibold text-purple-300">Thank you for shopping with ShopVerse!</p>
               <p className="mt-1 text-xs text-[#555568]">
                 This is a computer-generated invoice and does not require a signature.
               </p>

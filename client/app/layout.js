@@ -13,15 +13,15 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    default: "ShopEase — Premium Shopping",
-    template: "%s | ShopEase",
+    default: "ShopVerse — Premium Shopping",
+    template: "%s | ShopVerse",
   },
   description:
     "Discover high-quality products. Secure checkout, fast delivery, and a premium experience — every time.",
   keywords: ["shopping", "ecommerce", "products", "online store"],
   metadataBase: new URL("http://localhost:3000"),
   openGraph: {
-    title: "ShopEase — Premium Shopping",
+    title: "ShopVerse — Premium Shopping",
     description: "Discover high-quality products with secure checkout.",
     type: "website",
   },

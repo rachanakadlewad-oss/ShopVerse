@@ -58,7 +58,7 @@ export default function Login() {
           </div>
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">Welcome back</p>
-            <h1 className="mt-1 text-3xl font-bold">Sign in to ShopEase</h1>
+            <h1 className="mt-1 text-3xl font-bold">Sign in to ShopVerse</h1>
             <p className="mt-1.5 text-sm text-[#9898b0]">Continue your shopping journey</p>
           </div>
         </div>
